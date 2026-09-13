@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "dataset_kind": "synthetic_demo",
+  "input_draws": 240,
+  "warmup_draws": 60,
+  "evaluation_draws": 180,
+  "evaluation_start": "2000-03-01",
+  "evaluation_end": "2000-08-27",
+  "models": [
+    {
+      "model": "uniform",
+      "draws": 180,
+      "total_log_gain": -6.394884621840902e-13,
+      "mean_log_gain": -3.552713678800501e-15,
+      "mean_95pct_block_ci": [
+        -3.552713678800501e-15,
+        -3.552713678800501e-15
+      ],
+      "one_sided_bootstrap_p": 1.0,
+      "holm_p": 1.0,
+      "uncertainty_status": "exploratory_block_bootstrap",
+      "mean_brier_gain": 0.0
+    },
+    {
+      "model": "sparse_single_ball",
+      "draws": 180,
+      "total_log_gain": -0.1683609904850627,
+      "mean_log_gain": -0.0009353388360281261,
+      "mean_95pct_block_ci": [
+        -0.0024657660279189743,
+        0.00046533434783124626
+      ],
+      "one_sided_bootstrap_p": 0.8875562218890555,
+      "holm_p": 1.0,
+      "uncertainty_status": "exploratory_block_bootstrap",
+      "mean_brier_gain": -4.12442271250777e-06
+    },
+    {
+      "model": "spike_slab",
+      "draws": 180,
+      "total_log_gain": -0.26717488441446235,
+      "mean_log_gain": -0.0014843049134136799,
+      "mean_95pct_block_ci": [
+        -0.0037698323790400874,
+        0.0006382006623885787
+      ],
+      "one_sided_bootstrap_p": 0.8995502248875562,
+      "holm_p": 1.0,
+      "uncertainty_status": "exploratory_block_bootstrap",
+      "mean_brier_gain": -6.513741096011608e-06
+    },
+    {
+      "model": "online_mixture",
+      "draws": 180,
+      "total_log_gain": -0.10356255457791619,
+      "mean_log_gain": -0.0005753475254328677,
+      "mean_95pct_block_ci": [
+        -0.00151397034979069,
+        0.0002879144996788591
+      ],
+      "one_sided_bootstrap_p": 0.8875562218890555,
+      "holm_p": 1.0,
+      "uncertainty_status": "exploratory_block_bootstrap",
+      "mean_brier_gain": -2.540673797692976e-06
+    }
+  ],
+  "interpretation": "Log-score gains measure forecast quality, not cash return. Synthetic data cannot establish a physical effect."
+}

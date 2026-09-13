@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "dataset_kind": "synthetic_demo",
+  "input_sha256": "cdb36796093b336ef688c0acd00f5e8fef312ee387c746664992e9e00343d01f",
+  "package_version": "0.1.0",
+  "python": "3.11.7",
+  "numpy": "1.26.4",
+  "scipy": "1.17.1",
+  "seed": 20260914,
+  "reset_date": null,
+  "warmup_draws": 60,
+  "models": [
+    "uniform",
+    "sparse_single_ball",
+    "spike_slab",
+    "online_mixture"
+  ],
+  "prior_strength": 20,
+  "single_ball_alternative_mass": 0.5,
+  "spike_bias_probability": 0.02040816326530612,
+  "mixture_prior": [
+    0.5,
+    0.25,
+    0.25
+  ],
+  "mixture_learning_rate": 0.25,
+  "mixture_prior_mix": 0.01,
+  "bootstrap_replicates": 2000,
+  "bootstrap_block_length": 8,
+  "selection": "Fixed model settings; no evaluation-window tuning",
+  "source_hashes": {
+    "__init__.py": "b06af72ddc20edaa0fccb83b7e2ada9d4064c9c4da8a7601f0dbb2a5a5fcc720",
+    "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "cli.py": "bb6326b432731ab8f8c8b61c0d74501fc90490709ed9ca951aed1c870bfbe9e7",
+    "data.py": "9820697dec86093720dd59a39670dc6b22e3a27848e736e83ec0ff8ad5b30550",
+    "evaluation.py": "98e8b50842411f69cb312e33e1f620fafbd2ac71966f67622eab553990015170",
+    "probability.py": "3663380ad05c66bbc1ff180b392bcac149038adfbb4c117dcd18e798ba6c94db",
+    "sparse.py": "86983f57da623a2349f60046f6181c99df1823a33314a2784be841eae83e5ba7"
+  }
+}
