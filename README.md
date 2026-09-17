@@ -1,6 +1,6 @@
 # Mark Six: probabilistic modeling and model validation
 
-Forecasting unordered sets of six distinct numbers from 49, using sparse Bayesian models and chronological evaluation against a uniform baseline.
+Forecasting Mark Six draws (Hong Kong's 6-of-49 lottery): unordered sets of six distinct numbers from 49, using sparse Bayesian models and chronological evaluation against a uniform baseline.
 
 The implementation covers exact set probabilities, inclusion marginals, online model averaging, regime resets, and uncertainty estimates. The included example uses synthetic fair draws. A separate historical comparison covers 16 model configurations over 1,075 draws; it did not establish a predictive edge.
 
@@ -20,7 +20,7 @@ The default example generates 240 independent fair draws with seed `20260914` an
 
 ![Cumulative log-score gains on synthetic fair draws](results/demo_comparison.svg)
 
-The [reference summary](results/demo/summary.json) and [scores](results/demo/scores.csv) contain the plotted values.
+The [reference summary](results/demo/summary.json) and [scores](results/demo/scores.csv) contain the plotted values. On fair draws no model can beat the uniform baseline in expectation, so the slightly negative totals here are the expected control result; `tests/test_evaluation.py` checks that the same evaluator does detect a planted signal.
 
 Evaluate another CSV:
 
@@ -39,7 +39,7 @@ An optional `--reset-date YYYY-MM-DD` clears training history and mixture weight
 | `uniform` | Equal probability for each of the 13,983,816 six-number sets. |
 | `sparse_single_ball` | Bayesian averaging over a uniform null and 49 mutually exclusive single-ball bias hypotheses. |
 | `spike_slab` | Per-ball shrinkage toward the fair inclusion probability, with a sparse alternative prior. |
-| `online_mixture` | Arithmetic probability mixture of the three preceding forecasts, weighted by earlier scores. |
+| `online_mixture` | Arithmetic probability mixture of the three models above, weighted by earlier scores. |
 
 The beta alternatives are centered at `6/49` with concentration 20. The single-ball model splits prior mass equally between the uniform null and all alternatives together. The spike-and-slab prior assigns bias probability `1/49` to each ball. These are fixed statistical assumptions, not measured physical properties.
 
@@ -68,7 +68,7 @@ The [historical aggregate results](results/research_summary.json) cover 843 deve
 
 ![Historical mean log-score gains and confidence intervals](results/research_comparison.svg)
 
-The strongest newer-machine point estimate was the spike-and-slab reference: **+2.392 total nats**, or **+0.0460 nats per draw**, with a 95% mean interval of **[-0.0214, +0.1286]**. Every nonuniform interval includes zero, and all corresponding Holm-adjusted p-values are 1.00. The historical intervals use 3,000 circular block resamples, with five-draw blocks for windows below 100 draws and 20 otherwise. Corrections cover the 15 nonuniform models within each period, not the complete earlier exploratory search.
+The strongest newer-machine point estimate was the spike-and-slab reference: **+2.392 total nats**, or **+0.0460 nats per draw**, with a 95% mean interval of **[-0.0214, +0.1286]**. Every nonuniform newer-machine interval includes zero, and all corresponding Holm-adjusted p-values are 1.00. The historical intervals use 3,000 circular block resamples, with five-draw blocks for windows below 100 draws and 20 otherwise. Corrections cover the 15 nonuniform models within each period, not the complete earlier exploratory search.
 
 These aggregates use a broader experimental suite and historical inputs that are not included here. The four-model synthetic example does not reproduce that study. The aggregate file records its source checksum and unrounded metrics. Statistical fit alone does not identify a physical mechanism, and the results remain inconclusive.
 

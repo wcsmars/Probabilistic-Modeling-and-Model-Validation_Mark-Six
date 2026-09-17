@@ -17,9 +17,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def set_style():
-    """Keep SVG text selectable and omit volatile creation metadata."""
+    """Keep SVG text selectable, with font fallbacks, and omit volatile metadata."""
     plt.rcParams.update({
-        "font.family": "DejaVu Sans", "font.size": 11, "axes.labelsize": 11,
+        "font.family": "sans-serif", "font.sans-serif": ["DejaVu Sans", "Helvetica", "Arial"],
+        "font.size": 11, "axes.labelsize": 11,
         "axes.edgecolor": "#9aa6b2", "axes.labelcolor": "#263648",
         "xtick.color": "#455468", "ytick.color": "#263648",
         "svg.fonttype": "none", "svg.hashsalt": "marksix-figures-v1",
