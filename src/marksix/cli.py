@@ -20,6 +20,10 @@ from .evaluation import MODEL_NAMES, summarize, walk_forward
 from .probability import UNIFORM_LOGP
 
 
+# Exogenous generation boundaries, never estimated from outcomes.
+MACHINE_RESET_DATES = ("2010-11-09", "2026-05-05")
+
+
 def _dump(path, value):
     path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n", encoding="utf-8")
 
@@ -32,16 +36,22 @@ def run(input_path, output_path, *, warmup=60, reset_date=None, seed=20260914,
         raise ValueError("Output already exists; choose a new directory")
     input_bytes = Path(input_path).read_bytes()
     data = load_draws_bytes(input_bytes)
-    reset_index = None
+    reset_dates = set(MACHINE_RESET_DATES)
     if reset_date is not None:
         boundary = date.fromisoformat(reset_date).isoformat()
         if boundary != reset_date:
             raise ValueError("reset-date must use YYYY-MM-DD")
-        reset_index = next((i for i, d in enumerate(data.dates) if d >= boundary), len(data.dates))
-    result = walk_forward(data.outcomes, warmup=warmup, reset_index=reset_index)
+        reset_dates.add(boundary)
+    reset_dates = sorted(reset_dates)
+    reset_indices = sorted({next((i for i, d in enumerate(data.dates) if d >= boundary),
+                                len(data.dates)) for boundary in reset_dates})
+    result = walk_forward(data.outcomes, warmup=warmup, reset_indices=reset_indices)
     summary = {"schema_version": 1, "dataset_kind": dataset_kind,
                "input_draws": len(data.dates), "warmup_draws": warmup,
                "evaluation_draws": len(result["indices"]),
+               "machine_policy": "independent_generation_fit_no_transfer",
+               "betting_eligible": False,
+               "betting_status": "research_scores_only_no_per_line_EV_or_verified_draw_terms",
                "evaluation_start": data.dates[warmup], "evaluation_end": data.dates[-1],
                "models": summarize(result, data.outcomes, seed=seed),
                "interpretation": "Log-score gains measure forecast quality, not cash return. Synthetic data cannot establish a physical effect."}
@@ -49,7 +59,12 @@ def run(input_path, output_path, *, warmup=60, reset_date=None, seed=20260914,
                   "input_sha256": hashlib.sha256(input_bytes).hexdigest(),
                   "package_version": __version__, "python": platform.python_version(),
                   "numpy": np.__version__, "scipy": scipy.__version__,
-                  "seed": seed, "reset_date": reset_date, "warmup_draws": warmup,
+                  "seed": seed, "reset_date": reset_date, "reset_dates": reset_dates,
+                  "reset_indices": reset_indices, "warmup_draws": warmup,
+                  "machine_policy": "independent_generation_fit_no_transfer",
+                  "physical_measurements": "not_available; fitted statistical effects only",
+                  "number_selection": "draw_probabilities_only_no_popularity_features",
+                  "operational_EV_rule": "expected_gross_HKD_per_full_line > 10; this evaluator does not certify EV",
                   "models": list(MODEL_NAMES), "prior_strength": 20,
                   "single_ball_alternative_mass": 0.5, "spike_bias_probability": 1/49,
                   "mixture_prior": [0.5, 0.25, 0.25], "mixture_learning_rate": 0.25,
@@ -91,7 +106,7 @@ def main(argv=None):
         sub.add_argument("--output", required=True, help="New output directory; existing paths are rejected")
         sub.add_argument("--warmup", type=int, default=60)
         sub.add_argument("--seed", type=int, default=20260914)
-        sub.add_argument("--reset-date", help="Optional, pre-specified YYYY-MM-DD regime boundary")
+        sub.add_argument("--reset-date", help="Additional pre-specified YYYY-MM-DD boundary; known machine changes always reset")
         if name == "evaluate":
             sub.add_argument("--input", required=True)
         else:

@@ -11,8 +11,8 @@ MODEL_NAMES = ("uniform", "sparse_single_ball", "spike_slab", "online_mixture")
 MIXTURE_PRIOR = np.array([0.5, 0.25, 0.25])
 
 
-def walk_forward(y, *, warmup=60, reset_index=None):
-    """Score t using only y[:t]; an optional exogenous boundary resets state.
+def walk_forward(y, *, warmup=60, reset_index=None, reset_indices=()):
+    """Score t using only preceding draws from the same machine generation.
 
     Every component forecasts a conditional-Poisson set law. Propensity
     conversion is an explicit projection, including for the single-ball model.
@@ -31,13 +31,20 @@ def walk_forward(y, *, warmup=60, reset_index=None):
             or not isinstance(reset_index, (int, np.integer))
             or not 0 <= reset_index <= len(y)):
         raise ValueError("reset_index must lie between zero and the draw count")
+    boundaries = set(reset_indices)
+    if reset_index is not None:
+        boundaries.add(reset_index)
+    if any(isinstance(b, bool) or not isinstance(b, (int, np.integer))
+           or not 0 <= b <= len(y) for b in boundaries):
+        raise ValueError("reset_indices must contain valid draw indices")
+    boundaries = sorted(boundaries)
     indices = np.arange(warmup, len(y))
     probabilities, all_marginals, mixture_history = [], [], []
     weights = MIXTURE_PRIOR.copy()
     for t in indices:
-        if t == reset_index:
+        if t in boundaries:
             weights = MIXTURE_PRIOR.copy()
-        start = reset_index if reset_index is not None and t >= reset_index else 0
+        start = max((b for b in boundaries if b <= t), default=0)
         history = y[start:t]
         z = np.stack([np.zeros(49),
                       log_weights(sparse_prediction(history, strength=20, alt_mass=0.5)),

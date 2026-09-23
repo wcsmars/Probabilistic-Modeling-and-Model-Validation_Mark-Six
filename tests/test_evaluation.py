@@ -57,6 +57,18 @@ class EvaluationTests(unittest.TestCase):
         np.testing.assert_allclose(a['mixture_weights'][10], MIXTURE_PRIOR)
         np.testing.assert_allclose(a['marginals'][10], np.full((4, 49), 6/49), atol=1e-12)
 
+    def test_multiple_machine_boundaries_remove_all_earlier_state(self):
+        y = synthetic(90)
+        altered = y.copy()
+        altered[:75] = synthetic(75, seed=99, planted=True)
+        a = walk_forward(y, warmup=50, reset_indices=(60, 75))
+        b = walk_forward(altered, warmup=50, reset_indices=(60, 75))
+        np.testing.assert_allclose(a['marginals'][25:], b['marginals'][25:], atol=0, rtol=0)
+        np.testing.assert_allclose(a['mixture_weights'][25:], b['mixture_weights'][25:], atol=0, rtol=0)
+        np.testing.assert_allclose(a['mixture_weights'][25], MIXTURE_PRIOR)
+        with self.assertRaises(ValueError):
+            walk_forward(y, reset_indices=(float('nan'),))
+
     def test_strong_synthetic_signal_is_detectable(self):
         result = walk_forward(synthetic(140, planted=True), warmup=60)
         gain = result['log_probabilities'][:, 1:] - result['log_probabilities'][:, :1]
@@ -138,6 +150,31 @@ class DataAndRunTests(unittest.TestCase):
             self.assertEqual(saved, (output/'summary.json').read_bytes())
             self.assertFalse((output/'synthetic_draws.csv').exists())
             self.assertNotIn(str(root), (output/'provenance.json').read_text())
+
+    def test_known_machine_change_is_automatic_with_missing_boundary_day(self):
+        from datetime import date, timedelta
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root/'input.csv'
+            y = synthetic(75)
+            # Omit the actual first-machine day: resetting cannot depend on exact match.
+            days = [date(2026, 3, 1) + timedelta(days=i) for i in range(76)]
+            days = [d for d in days if d.isoformat() != '2026-05-05'][:75]
+            with source.open('w', newline='') as handle:
+                writer = csv.writer(handle)
+                writer.writerow(['date', 'draw_id', *(f'n{i}' for i in range(1, 7))])
+                for i, (day, row) in enumerate(zip(days, y)):
+                    writer.writerow([day.isoformat(), str(i), *(np.flatnonzero(row)+1)])
+            result = run(source, root/'output', warmup=50, reset_date='2026-04-01')
+            provenance = json.loads((root/'output'/'provenance.json').read_text())
+            self.assertIn('2026-05-05', provenance['reset_dates'])
+            self.assertIn('2026-04-01', provenance['reset_dates'])
+            self.assertFalse(result['betting_eligible'])
+            scores = list(csv.DictReader((root/'output'/'scores.csv').open()))
+            first_new = [row for row in scores if row['date'] == '2026-05-06']
+            self.assertEqual(len(first_new), 4)
+            for row in first_new:
+                self.assertAlmostEqual(float(row['log_gain']), 0., places=11)
 
     def test_invalid_input_does_not_create_output(self):
         with tempfile.TemporaryDirectory() as directory:

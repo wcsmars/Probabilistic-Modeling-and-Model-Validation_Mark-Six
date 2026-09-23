@@ -30,7 +30,11 @@ python3 -m marksix evaluate --input path/to/draws.csv --output results/custom --
 
 Required columns are `date`, `draw_id`, and `n1` through `n6`. Dates must be unique, strictly increasing `YYYY-MM-DD` values; IDs must be nonempty and unique. Each outcome must contain six distinct integers from 1 to 49. An optional populated `extra` column must contain a seventh distinct number; it does not enter the main-set forecast score.
 
-An optional `--reset-date YYYY-MM-DD` clears training history and mixture weights at the first draw on or after a predetermined regime boundary. Warmup applies once, at the beginning of the dataset. A reset can therefore produce a forecast from the prior alone.
+Known machine changes on **9 November 2010** and **5 May 2026** automatically clear training history and mixture weights at the first available draw on or after each boundary. `--reset-date YYYY-MM-DD` adds another predetermined boundary; it cannot disable those resets. Old-machine observations never train new-machine effects. Warmup applies once, at the beginning of the dataset. A reset can therefore produce a forecast from the prior alone.
+
+This CLI is a research evaluator and does not authorize a bet. Operational use requires **expected gross payout strictly greater than HK$10 for every full HK$10 line**, under a normalized forecast and stated, verified pre-draw payout inputs. Equality does not qualify. Number predictions must not depend on player popularity, ticket sales, or jackpot size; monetary valuation follows prediction and uses identical sharing assumptions for every combination. No physical chamber or ball measurements are supplied by these statistical models.
+
+The machine replacement is confirmed by [HKJC's April 2026 announcement](https://corporate.hkjc.com/en-US/news-and-publications/corporate-news/2026-04/news_2026042101511). The stored historical aggregates below predate this stricter isolation policy and have not been recomputed under it.
 
 ## Models
 
